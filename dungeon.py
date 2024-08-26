@@ -26,7 +26,7 @@ class Dungeon:
             while self.in_battle :
                 self.player_in_attack = True
                 while self.player_in_attack:
-                    if self.player_turn() :
+                    if player.player_turn() :
                         self.player_in_attack = False
                 
                 #check if enmy dead could be fixed if take_damage was rewrtien
@@ -37,7 +37,7 @@ class Dungeon:
                     print(f"you entered room-{self.room}")
                     print(" ")
                 else:
-                    self.enemy_turn()
+                    self.enemy.enemy_turn(player)
                     
                 if player.health <= 0:
                     player.die(player)
@@ -46,13 +46,9 @@ class Dungeon:
                 
             self.enemy.health = self.enemy.max_health
             player.defense = player.armor.defense
+            
             if self.room == 31:
-                print("====================================")
-                print("|Congrats on destroing the dungeon |")
-                print("====================================")
-                self.in_dungeon = False
-                player.print_stats()
-                exit()
+                self.win()
 
     #simple enmy picking based on room
     def pick_enemy(self) -> Enemy:
@@ -69,29 +65,9 @@ class Dungeon:
                 return enemy_0_03
             return [enemy_3_01,enemy_3_02,enemy_3_03,enemy_3_04,enemy_3_05][rng.randint(0,4)]
     
-    #player input
-    def player_turn(self) -> bool:
-        player_input = input("Whats your move  : ").lower()
-        match player_input:
-            case "attack":
-                if player.can_attack():
-                    player.attack(self.enemy)
-                    return True
-                print(" ")
-                print("Player doesnt have enough energy")
-                print(" ")
-                return False
-            case "rest":
-                player.rest()
-                return True
-            case "heal":
-                if player.heal():
-                    return True
-        return False
-    
-    #enemy ai
-    def enemy_turn(self) :
-        if self.enemy.energy > 20:
-            self.enemy.attack(player)
-        else:
-            self.enemy.rest()
+    def win():
+        print("====================================")
+        print("|Congrats on destroing the dungeon |")
+        print("====================================")
+        player.print_stats()
+        exit()

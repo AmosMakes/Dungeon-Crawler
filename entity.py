@@ -57,6 +57,14 @@ class Enemy(Entity):
         self.tressure = tressure
         super().__init__(health,max_health,defense,energy,max_energy,min_damage,max_damage)
     
+    #enmy AI
+    def enemy_turn(self,player) :
+        if self.energy > 20:
+            self.attack(player)
+        else:
+            self.rest()
+    
+    
     #we give player the gold and random chance at item
     def die(self,player):
         gold_earned = rng.randint(self.min_gold,self.max_gold)
@@ -191,6 +199,26 @@ class Player(Entity):
         print(" ")
         print(f"player doesnt have enough heals")
         print(" ")
+        return False
+
+    #player input
+    def player_turn(self,enemy) -> bool:
+        player_input = input("Whats your move  : ").lower()
+        match player_input:
+            case "attack":
+                if self.can_attack():
+                    self.attack(enemy)
+                    return True
+                print(" ")
+                print("Player doesnt have enough energy")
+                print(" ")
+                return False
+            case "rest":
+                self.rest()
+                return True
+            case "heal":
+                if self.heal():
+                    return True
         return False
 
     #player died
