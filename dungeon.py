@@ -26,23 +26,11 @@ class Dungeon:
             while self.in_battle :
                 self.player_in_attack = True
                 while self.player_in_attack:
-                    if player.player_turn() :
+                    if player.player_turn(self.enemy,self) :
                         self.player_in_attack = False
                 
-                #check if enmy dead could be fixed if take_damage was rewrtien
-                if self.enemy.health <= 0:
-                    self.in_battle = False
-                    self.enemy.die(player)
-                    print(" ")
-                    print(f"you entered room-{self.room}")
-                    print(" ")
-                else:
-                    self.enemy.enemy_turn(player)
+                self.enemy.enemy_turn(player,self)
                     
-                if player.health <= 0:
-                    player.die(player)
-                    self.in_battle = False
-                    self.in_dungeon = False
                 
             self.enemy.health = self.enemy.max_health
             player.defense = player.armor.defense

@@ -11,15 +11,16 @@ class Entity:
         self.max_damage = max_damage
     
     # We get a random damage base on the stats and use take damage function
-    def attack(self, entity ) -> None:
+    def attack(self, entity,dungeon ) -> None:
         self.energy = clamp(self.energy -20,0,self.max_energy)
         damage = rng.randint(self.min_damage,self.max_damage)
-        entity.take_damage(damage,self)
-        print(" ")
-        print(f"{self.name} attacked {entity.name}")
-        print(f"{self.name} dealt {damage}")
-        print(f"{entity.name} has {entity.health}hp / {entity.defense}def / {entity.energy}energy")
-        print(" ")
+        entity.take_damage(damage,self,dungeon)
+        if entity.health > 0:
+            print(" ")
+            print(f"{self.name} attacked {entity.name}")
+            print(f"{self.name} dealt {damage}")
+            print(f"{entity.name} has {entity.health}hp / {entity.defense}def / {entity.energy}energy")
+            print(" ")
     
     # this function will be called in fight not in attack function
     def can_attack(self) -> bool   :
@@ -36,16 +37,16 @@ class Entity:
         print(f"hp: {self.health}") 
     
     # simple take damage function  defense must be destroyed before damaging health
-    def take_damage(self, damage : float,entity) -> None:
+    def take_damage(self, damage : float,entity,dungeon) -> None:
         if self.defense > 0:
             self.defense = clamp(self.defense - damage,0,5000)
         else:
             self.health = clamp(self.health - damage,0,5000) 
             if self.health <= 0:
-                self.die(entity)
+                self.die(entity,dungeon)
     
     # this function get rewriten in child class its here just so that take_damage can call it so i dont have to make new take_damage in child
-    def die(self,entity) -> None:
+    def die(self,entity,dungeon) -> None:
         pass
         
 
@@ -58,15 +59,16 @@ class Enemy(Entity):
         super().__init__(health,max_health,defense,energy,max_energy,min_damage,max_damage)
     
     #enmy AI
-    def enemy_turn(self,player) :
-        if self.energy > 20:
-            self.attack(player)
-        else:
-            self.rest()
+    def enemy_turn(self,player,dungeon) :
+        if self.health > 0:
+            if self.energy > 20:
+                self.attack(player,dungeon)
+            else:
+                self.rest()
     
     
     #we give player the gold and random chance at item
-    def die(self,player):
+    def die(self,player,dungeon):
         gold_earned = rng.randint(self.min_gold,self.max_gold)
         player.purse += gold_earned
         print(" ")
@@ -81,7 +83,9 @@ class Enemy(Entity):
             #self.player/
         
         print("--------------------")
+        dungeon.in_battle = False
         print(" ")
+        print(f"you entered room-{dungeon.room}")
     
 
 class Player(Entity):
@@ -202,12 +206,12 @@ class Player(Entity):
         return False
 
     #player input
-    def player_turn(self,enemy) -> bool:
+    def player_turn(self,enemy,dungeon) -> bool:
         player_input = input("Whats your move  : ").lower()
         match player_input:
             case "attack":
                 if self.can_attack():
-                    self.attack(enemy)
+                    self.attack(enemy,dungeon)
                     return True
                 print(" ")
                 print("Player doesnt have enough energy")
@@ -222,11 +226,13 @@ class Player(Entity):
         return False
 
     #player died
-    def die(self,player) -> None:
+    def die(self,player,dungeon) -> None:
         print(" ")
         print("you died returning to lobby")
         print("--------------------")
         print(" ")
+        dungeon.in_battle = False
+        dungeon.in_dungeon = False
         #self.print_stats()
         # set running false
     
